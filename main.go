@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"time"
 	"strconv"
 	"strings"
 
@@ -43,6 +44,20 @@ func main() {
 	})
 
 	http.HandleFunc("/headers", func(w http.ResponseWriter, r *http.Request) {
+		keys, ok := r.URL.Query()["key"]
+		if ok && len(keys) > 0 {
+			fmt.Fprintf(w, r.Header.Get(keys[0]))
+			return
+		}
+		headers := []string{}
+		for key, values := range r.Header {
+			headers = append(headers, fmt.Sprintf("%s=%s", key, strings.Join(values, ",")))
+		}
+		fmt.Fprintf(w, strings.Join(headers, "\n"))
+	})
+	
+	http.HandleFunc("/snooze", func(w http.ResponseWriter, r *http.Request) {
+		time.Sleep(3*time.Second)
 		keys, ok := r.URL.Query()["key"]
 		if ok && len(keys) > 0 {
 			fmt.Fprintf(w, r.Header.Get(keys[0]))
